@@ -140,5 +140,5 @@ footer:
         example_macro: (argument)
             <python>
     shorthands:
-        \y: YINL
+        y: YINL
 ```
