@@ -4,53 +4,73 @@ This document specifies the YINL format. YINL files are UTF-8 encoded plain text
 
 Please note that throughout this document, content appearing in `<` and `>` is acting as a place-holder for user-generated content and when used should be replaced in full.
 
-YINL files are broken into sections with the `section` keyword. A section has the following syntax, `<content>` may begin on the same line
+YINL files are broken into three major parts, the `header`, body, and `footer`. In the `header` the following information may be specified
+
+- `title` The title of the document
+- `author` The author(s) of the document
+- `date` The date of the document
+- `institute` The insitute(s) of the author(s)
+- `citations` The citation style to be used in the document
+
+The body is broken into sections with the `section` keyword. A section has the following syntax, `<content>` may begin on the same line
 
 ```
 section <title>:
     <content>
 ```
 
-Furthermore, a number of special types of section can be defined with following alternative keywords
-
-- `title` The title of the document
-- `author` The author(s) of the document
-- `date` The date of the document
-
-In addition to `section` and special types of `section`, YINL files can also contain macros with the following syntax:
+the body can also contain macros with the following syntax:
 
 ```
 <macro-name>: (<arg1>, <arg2>, ...)
 ```
 
-The common YINL macros are listed below
+The common YINL macros are listed below, further macros can be defined in the document footer with Python
 
 - `anchor: (<identifier>)` Defines a point to which a link can point
-- `link: (<identifier>, <text>)` Defines a link to an anchor
-- `cite: (<author>, <year>, <title>, <link>)` Defines a citation to be used in the `citations` section
-- `citations: (<style>)` Produces a section containing citations, `<style>` is the style of the citations, e.g. `ieee`
+- `link: (<identifier>, <text>)` Defines a link to an anchor with the given `<text>`
 - `figure: (<path>, <caption>)` Produces a figure with the given `<path>` and `<caption>`
+
+Shorthands are also available for advanced users, and are defined in the document footer. A shorthand follows the syntax:
+
+```
+\short-hand-name
+```
+
+The `footer` may contain three further sections describing `citations`, custom `macros`, and `shorthands`.
 
 An example of a simple YINL file is given below for clarity
 
 ```
-title:
-    YINL Specification
-author:
-    J. L. Hay
-date:
-    2023-04-01
+header:
+    title:
+        YINL Specification
+    author:
+        J. Doe
+    date:
+        2023-04-01
+    institute:
+        University of New Zealand
+    citations:
+        IEEE
 
 section Introduction:
 
     This document introduces the specification for the YINL format.
 
     section Why YINL?: anchor: (why-yinl)
-        This is a subsection describing why YINL was created. It is also has an anchor so it can b
+        This is a subsection describing why YINL was created. It is also has an anchor so it can be linked to
 
     figure: (/path/to/img.png, Figure 1 - An example figure) anchor: (fig1)
 
-    How about a citation now? cite: (J. L. Hay, 2023, YINL Specification), and a link to the why YINL section link: (why-yinl, link text)
+    How about a citation now? cite: (dnorman13), and a link to the why \y section link: (why-yinl, link text)
 
-citations: (ieee)
+footer:
+    citations:
+        dnorman13: D. A. Norman, The Design of Everyday Things. (Revis and expand ed.) 2013.
+    macros:
+        example_macro: (argument)
+            <python>
+    shorthands:
+        \y: YINL
 ```
