@@ -37,6 +37,26 @@ section <title>:
 
 It is permitted that the `<content>` of a `section` may contain further `section`s, encapsulated `section`s will be treated as a subsection of the original `section` and styled accordingly.
 
+### Lists
+
+If you wish to make unordered lists of items, you can use the following syntax within the document body
+
+```
+list:
+    <item1>
+    <item2>
+    ...
+```
+
+and ordered lists with
+
+```
+number:
+    <item1>
+    <item2>
+    ...
+```
+
 ### Macros
 
 The body can also contain macros with the following syntax
