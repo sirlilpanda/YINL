@@ -2,21 +2,10 @@
     Defines nodes of the YINL document tree.
 """
 
+import re
+
 from typing import Callable
-from dataclasses import dataclass
-
-class Node:
-    def __init__(self, data : str, parent : 'Node' = None) -> None:
-        self.parent : 'Node' = parent
-        self.children : list['Node'] = list()
-        self.data : str = data
-    
-    def __repr__(self) -> str:
-        return f"(id : {id(self)}\ndata: {self.data}\nparent:{id(self.parent)}\n\tamount:{len(self.children)})\n"
-
-    def add_child(self, node : 'Node'):
-        node.parent = self
-        self.children.append(node)
+from dataclasses import dataclass 
 
 @dataclass
 class Header:
@@ -31,6 +20,23 @@ class Header:
     institute: str = None
     citation_style: str = None      
 
+class Section:
+    """
+        Describes a section of the body of the document.
+    """
+    def __init__(self, name: str, content: str, parent : 'Section' = None) -> None:
+        self.parent: 'Section' = parent
+        self.name: str = name
+        self.children: list['Section'] = list()
+        self.content: str = content
+    
+    def __repr__(self) -> str:
+        return f"(id : {id(self)}\ndata: {self.data}\nparent:{id(self.parent)}\n\tamount:{len(self.children)})\n"
+
+    def add_child(self, section: 'Section'):
+        section.parent = self
+        self.children.append(section)
+
 @dataclass
 class Footer:
     """
@@ -44,30 +50,30 @@ class Footer:
 
 class Document:
 
-    def __init__(self, name: str) -> None:
+    def __init__(self) -> None:
         self.header = Header(self)
-        self.root = Node(name)
+        self.body: list[Section] = []
         self.footer = Footer(self)
 
-    def parse_header(self, file: str) -> None:
+    def parse_header(self, lines: list[str]) -> tuple[int, int]:
         """
             Parses the document header from an open file.
+            Returns the index of the header start and end in the file
         """
-        lines = file.split("\n")
         header_start = lines.index("header:")
         header_end = lines[header_start:].index("")
         header_lines = [line.strip() for line in lines[header_start:header_start+header_end] if line != ""]
 
         i = 0
         while i < len(header_lines):
-
             line = header_lines[i]
 
             if line.endswith(":") and not line.endswith("\\:"):
                 # key with value on next line
                 key = line[:-1]
                 value = header_lines[i+1]
-            elif ":" in line:
+                i += 1 # skip value line
+            elif ":" in line and "\:" not in line:
                 # key with value on same line
                 key, value = line.split(":")
                 value = value.strip()
@@ -90,27 +96,42 @@ class Document:
                     self.header.citation_style = value
 
             i += 1
-    
+
+        return header_start, header_end
+
+    def parse_footer(self, lines: list[str]) -> tuple[int, int]:
+        """
+            Parses the document header from an open file.
+            Returns the index of the header start and end in the file
+        """
+        raise NotImplementedError
+
+    def parse_body(self, lines: list[str]) -> tuple[int, int]:
+        """
+            Parses the body of the open file.
+        """
+        i = 0
+        content = []
+        while i < len(lines):
+            line = lines[i].strip()
+            if line.startswith("section") and line.endswith(":"):
+                content = []
+                section = Section(line[6:-1].strip(), content)
+                self.body.append(section)
+            elif line.startswith("footer:"):
+                # end of body
+                return 0, i
+            else:
+                content.append(line)
+        # end of body, no footer
+        return 0, -1
+
     def parse_file(self, file: str):
-        self.parse_header(file)
-        raw_file : list[str] = file.split("\n")
-        current = self.root
-        last_depth = 0
-        for line in raw_file:
-            line = line.split(" "*4)
-            depth_amount = len(line)-1
-            if last_depth == depth_amount:
-                last_depth += 1
-            elif last_depth > depth_amount:
-                for _ in range(depth_amount+1):
-                    current = current.parent                
-                last_depth -= depth_amount
-            node = Node(
-                line.pop(),
-                current
-            )
-            current.add_child(node)
-            current = node
-    
-    def __repr__(self) -> str:
-        return str(self.root)
+        """
+            Parses an open file into a Document tree.
+        """
+        lines = file.split("\n")
+        _, header_end = self.parse_header(lines)
+        _, body_end = self.parse_body(lines[header_end:])
+        if body_end != -1:
+            _, _ = self.parse_footer(lines[header_end+body_end:])
