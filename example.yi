@@ -1,0 +1,31 @@
+header:
+    title:
+        YINL Specification
+    author:
+        J. Doe
+    date:
+        2023-04-01
+    institute:
+        University of New Zealand
+    citations:
+        IEEE
+
+section Introduction:
+
+    This document introduces the specification for the YINL format.
+
+    section Why YINL?: anchor: (why-yinl)
+        This is a subsection describing why YINL was created. It is also has an anchor so it can be linked to
+
+    figure: (/path/to/img.png, Figure 1 - An example figure) anchor: (fig1)
+
+    How about a citation now? cite: (dnorman13), and a link to the why \y section link: (why-yinl, link text)
+
+footer:
+    citations:
+        dnorman13: D. A. Norman, The Design of Everyday Things. (Revis and expand ed.) 2013.
+    macros:
+        example_macro: (argument)
+            <python>
+    shorthands:
+        y: YINL
