@@ -16,7 +16,6 @@ Furthermore, a number of special types of section can be defined with following 
 - `title` The title of the document
 - `author` The author(s) of the document
 - `date` The date of the document
-- `image` An image to be included in the document, `<content>` should be a path to the image and `<title>` may be an optional caption
 
 In addition to `section` and special types of `section`, YINL files can also contain macros with the following syntax:
 
@@ -24,12 +23,13 @@ In addition to `section` and special types of `section`, YINL files can also con
 <macro-name>: (<arg1>, <arg2>, ...)
 ```
 
-There are three main macros used in YINL
+The common YINL macros are listed below
 
 - `anchor: (<identifier>)` Defines a point to which a link can point
 - `link: (<identifier>, <text>)` Defines a link to an anchor
 - `cite: (<author>, <year>, <title>, <link>)` Defines a citation to be used in the `citations` section
-- `citations: (<style>)` Defines a section containing citations, `<style>` is the style of the citations, e.g. `ieee`
+- `citations: (<style>)` Produces a section containing citations, `<style>` is the style of the citations, e.g. `ieee`
+- `figure: (<path>, <caption>)` Produces a figure with the given `<path>` and `<caption>`
 
 An example of a simple YINL file is given below for clarity
 
@@ -48,8 +48,7 @@ section Introduction:
     section Why YINL?: anchor: (why-yinl)
         This is a subsection describing why YINL was created. It is also has an anchor so it can b
 
-    image Captioned Image:
-        /path/to/img.png
+    figure: (/path/to/img.png, Figure 1 - An example figure) anchor: (fig1)
 
     How about a citation now? cite: (J. L. Hay, 2023, YINL Specification), and a link to the why YINL section link: (why-yinl, link text)
 
