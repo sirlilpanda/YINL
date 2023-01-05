@@ -10,6 +10,7 @@ def main():
     file = load_file("example.yi")    
     doc = Document("test")
     doc.parse_file(file)
+    print(doc.header)
     print(doc)
 
 if __name__ == "__main__":
