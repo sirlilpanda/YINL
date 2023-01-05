@@ -2,44 +2,112 @@
 
 This document specifies the YINL format. YINL files are UTF-8 encoded plain text files with a `.yi` or `.yinl` extension. It is intended that the YINL format be human-readable and writable, but also be compilable into a document. 
 
-Please note that throughout this document, content appearing in `<` and `>` is acting as a place-holder for user-generated content and when used should be replaced in full.
+Throughout this document content encapsulated in angle brackets (`<` and `>`) should be treated as a place-holder value.
 
-YINL files are broken into three major parts, the `header`, body, and `footer`. In the `header` the following information may be specified
+YINL files are broken into three major parts, the `header`, body, and `footer`. 
+
+## Header
+
+In the `header` the following information may be specified
 
 - `title` The title of the document
 - `author` The author(s) of the document
 - `date` The date of the document
-- `institute` The insitute(s) of the author(s)
+- `institute` The institute(s) of the author(s)
 - `citations` The citation style to be used in the document
 
-The body is broken into sections with the `section` keyword. A section has the following syntax, `<content>` may begin on the same line
+Each of these fields may be specified with the following syntax:
+
+```
+header:
+    ...
+    <field>:
+        <content>
+    ...
+```
+
+## Body
+
+The body is divided into sections using the section keyword. A section has the following syntax, with `<content>` potentially beginning on the same line:
 
 ```
 section <title>:
     <content>
 ```
 
-the body can also contain macros with the following syntax:
+It is permitted that the `<content>` of a `section` may contain further `section`s, encapsulated `section`s will be treated as a subsection of the original `section` and styled accordingly.
+
+### Macros
+
+The body can also contain macros with the following syntax
 
 ```
 <macro-name>: (<arg1>, <arg2>, ...)
 ```
 
-The common YINL macros are listed below, further macros can be defined in the document footer with Python
+The common YINL macros are listed below, further macros can be defined in the document `footer` with Python
 
 - `anchor: (<identifier>)` Defines a point to which a link can point
 - `link: (<identifier>, <text>)` Defines a link to an anchor with the given `<text>`
 - `figure: (<path>, <caption>)` Produces a figure with the given `<path>` and `<caption>`
 
-Shorthands are also available for advanced users, and are defined in the document footer. A shorthand follows the syntax:
+### Short-hands
+
+Short-hands are also available, and are defined in the document footer. A shorthand follows the syntax and will be replaced by the content specified in the `footer`
 
 ```
 \short-hand-name
 ```
 
-The `footer` may contain three further sections describing `citations`, custom `macros`, and `shorthands`.
+## Footer
 
-An example of a simple YINL file is given below for clarity
+The `footer` may contain three further sections describing `citations`, custom `macros`, and `shorthands`. 
+
+### Citations
+
+Citations are produced in the footer with the following syntax
+
+```
+footer:
+    ...
+    citations:
+        <identifier>: <author>, <title>, <year>
+        ...
+    ...
+```
+
+### Macros
+
+Custom macros can be defined using Python, the following syntax is used in the footer of the document
+
+```
+footer:
+    ...
+    macros:
+        <macro-name>: (<arg1>, <arg2>, ...)
+            <python>
+        ...
+    ...
+```
+
+The return value from the python code will be used as the output of the macro upon compilation.
+
+### Short-hands
+
+Short-hands are defined in the footer as follows
+
+```
+footer:
+    ...
+    shorthands:
+        <short-hand>: <content>
+        ...
+    ...
+```
+
+## Example
+
+An example of a simple YINL file is given below to demonstrate the syntax
 
 ```
 header:
