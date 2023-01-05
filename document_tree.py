@@ -31,7 +31,8 @@ class Section:
         self.content: str = content
     
     def __repr__(self) -> str:
-        return f"(id : {id(self)}\ndata: {self.data}\nparent:{id(self.parent)}\n\tamount:{len(self.children)})\n"
+        
+        return f"Section({self.name}, {self.content})"
 
     def add_child(self, section: 'Section'):
         section.parent = self
@@ -54,6 +55,10 @@ class Document:
         self.header = Header(self)
         self.body: list[Section] = []
         self.footer = Footer(self)
+
+    def __repr__(self) -> str:
+
+        return "\n".join(str(section) for section in self.body)
 
     def parse_header(self, lines: list[str]) -> tuple[int, int]:
         """
@@ -104,7 +109,7 @@ class Document:
             Parses the document header from an open file.
             Returns the index of the header start and end in the file
         """
-        raise NotImplementedError
+        return 0, 0
 
     def parse_body(self, lines: list[str]) -> tuple[int, int]:
         """
@@ -116,13 +121,14 @@ class Document:
             line = lines[i].strip()
             if line.startswith("section") and line.endswith(":"):
                 content = []
-                section = Section(line[6:-1].strip(), content)
+                section = Section(line[7:-1].strip(), content)
                 self.body.append(section)
             elif line.startswith("footer:"):
                 # end of body
                 return 0, i
             else:
                 content.append(line)
+            i += 1
         # end of body, no footer
         return 0, -1
 
