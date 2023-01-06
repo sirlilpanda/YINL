@@ -42,7 +42,7 @@ It is permitted that the `<content>` of a `section` may contain further `section
 If you wish to make unordered lists of items, you can use the following syntax within the document body
 
 ```
-list:
+bullet:
     <item1>
     <item2>
     ...
@@ -51,9 +51,20 @@ list:
 and ordered lists with
 
 ```
-number:
+list:
     <item1>
     <item2>
+    ...
+```
+
+### Tables
+
+A table may be inserted into the body with the following syntax
+
+```
+table:
+    <header1>, <header2>, ...
+    <row1>, <row2>, ...
     ...
 ```
 
@@ -70,6 +81,7 @@ The common YINL macros are listed below, further macros can be defined in the do
 - `anchor: (<identifier>)` Defines a point to which a link can point
 - `link: (<identifier>, <text>)` Defines a link to an anchor with the given `<text>`
 - `figure: (<path>, <caption>)` Produces a figure with the given `<path>` and `<caption>`
+- `table: (<file>.csv)` Produces a table from the given CSV file
 
 ### Short-hands
 
