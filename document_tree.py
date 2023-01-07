@@ -7,6 +7,8 @@ import re
 from typing import Callable
 from dataclasses import dataclass 
 
+from pattern_matching import locate_macros, locate_shorthands, locate_sections
+
 @dataclass
 class Header:
     """
@@ -23,12 +25,25 @@ class Header:
 class Section:
     """
         Describes a section of the body of the document.
+
+        Parameters
+        ----------
+
+        name: str
+            The name (title) of the section.
+        content: str
+            The content of the section.
+        parent: Section
+            The parent section of this section. May be None if no parent.
+        pos: int
+            The position of this section within its parent section. Defaults to 0.
     """
-    def __init__(self, name: str, content: str, parent : 'Section' = None) -> None:
-        self.parent: 'Section' = parent
+    def __init__(self, name: str, content: str, parent: 'Section' = None, pos: int = 0) -> None:
         self.name: str = name
-        self.children: list['Section'] = list()
         self.content: str = content
+        self.parent: 'Section' = parent
+        self.pos: int = pos
+        self.children: list['Section'] = list()
     
     def __repr__(self) -> str:
         
@@ -50,6 +65,10 @@ class Footer:
     shorthands: dict[str, str] = None
 
 class Document:
+    """
+        Describes a YINL document.
+        Produced with `Document().parse_file("path/to/file.yi")`
+    """
 
     def __init__(self) -> None:
         self.header = Header(self)
@@ -60,14 +79,14 @@ class Document:
 
         return "\n".join(str(section) for section in self.body)
 
-    def parse_header(self, lines: list[str]) -> tuple[int, int]:
+    def parse_header(self, text: str):
         """
             Parses the document header from an open file.
-            Returns the index of the header start and end in the file
         """
+        lines = text.splitlines()
         header_start = lines.index("header:")
         header_end = lines[header_start:].index("")
-        header_lines = [line.strip() for line in lines[header_start:header_start+header_end] if line != ""]
+        header_lines = [line.strip() for line in lines[header_start:header_end] if line != ""]
 
         i = 0
         while i < len(header_lines):
@@ -102,42 +121,40 @@ class Document:
 
             i += 1
 
-        return header_start, header_end
-
-    def parse_footer(self, lines: list[str]) -> tuple[int, int]:
+    def parse_footer(self, text: str):
         """
             Parses the document header from an open file.
-            Returns the index of the header start and end in the file
         """
-        return 0, 0
+        footer_start = text.splitlines().index("footer:")
+        # TODO: implement
 
-    def parse_body(self, lines: list[str]) -> tuple[int, int]:
+    def parse_body(self, text: str):
         """
             Parses the body of the open file.
         """
-        i = 0
-        content = []
-        while i < len(lines):
-            line = lines[i].strip()
-            if line.startswith("section") and line.endswith(":"):
-                content = []
-                section = Section(line[7:-1].strip(), content)
-                self.body.append(section)
-            elif line.startswith("footer:"):
-                # end of body
-                return 0, i
-            else:
-                content.append(line)
-            i += 1
-        # end of body, no footer
-        return 0, -1
+        sections = locate_sections(text)
+        macros = locate_macros(text)
+        shorthands = locate_shorthands(text)
+
+        for section in sections:
+            # TODO: parse out subsections and mark them as a child of the parent section
+            self.sections.append(Section(section[0], section[1]))
+
+        # TODO: deal with macros and shorthands
+        # may need to parse the footer first in order to implement this
+
+    def parse_text(self, text: str):
+        """
+            Parses text into a document tree
+        """
+        self.parse_header(text)
+        self.parse_body(text)
+        self.parse_footer(text)
 
     def parse_file(self, file: str):
         """
-            Parses an open file into a Document tree.
+            Parses text from a .yi file into a document tree
         """
-        lines = file.split("\n")
-        _, header_end = self.parse_header(lines)
-        _, body_end = self.parse_body(lines[header_end:])
-        if body_end != -1:
-            _, _ = self.parse_footer(lines[header_end+body_end:])
+        with open(file, "r") as f:
+            text = f.read()
+        self.parse_text(text)
