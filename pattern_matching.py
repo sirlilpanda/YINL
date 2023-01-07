@@ -62,7 +62,7 @@ def get_sections(text: str) -> list[tuple[str, int, str]]:
         for line in text[section.end():].splitlines()[1:]:
             if get_indent(line) // indent_size > section_indent:
                 # include lines that are indented more than the section
-                section_content += line.strip() + "\n"
+                section_content += line[(section_indent+1)*indent_size:].rstrip() + "\n"
             elif len(line) == 0:
                 # inclue empty lines
                 section_content += "\n"
