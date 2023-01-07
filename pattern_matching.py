@@ -52,19 +52,7 @@ def locate_shorthands(text: str) -> list[re.Match]:
     """
     return list(re.finditer(SHORTHAND_PATTERN, text))
 
-def get_header(text: str) -> str:
-    """
-        Gets the header from a piece of text.
-    """
-    return locate_header(text).group()
-
-def get_footer(text: str) -> str:
-    """
-        Gets the footer from a piece of text.
-    """
-    return locate_footer(text).group()
-
-def get_sections(text: str, matches: list[re.Match] = None) -> list[tuple[str, int, str]]:
+def get_sections(text: str, matches: list[re.Match] = None) -> list[tuple[str, int, str, int, int]]:
     """
         Gets sections and their contents from a piece of text.
         Note that section content may include subsections, macros, and shorthands.
@@ -108,20 +96,6 @@ def get_sections(text: str, matches: list[re.Match] = None) -> list[tuple[str, i
                 # break if the line is less indented than the section and is not empty
                 # this indicates the section has ended :)
                 break
-        sections.append((section_name, section_indent, section_content))
+        sections.append((section_name, section_indent, section_content, section.start(), section.end()))
 
     return sections
-    
-def get_macros(text: str) -> list[tuple[str, tuple[str]]]:
-    """
-        Gets macros and their arguments from a piece of text.
-        Returns a list of tuples of the form (macro_name, macro_args)
-    """
-    macro_locations = locate_macros(text)
-    macros = []
-    for macro in macro_locations:
-        macro_name = macro.group().split(":")[0].strip()
-        macro_args = macro.group().split(":")[1].strip()[1:-1].split(",")
-        macro_args = tuple([arg.strip() for arg in macro_args])
-        macros.append((macro_name, macro_args))
-    return macros
