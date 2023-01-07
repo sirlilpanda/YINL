@@ -2,7 +2,7 @@
     Pytest tests for testing pattern matching module.
 """
 
-from ..pattern_matching import get_indent, locate_macros, locate_sections, get_sections
+from ..pattern_matching import get_indent, locate_macros, get_macros, locate_sections, get_sections
 
 with open("tests/test.yi", "r") as f:
     EXAMPLE_TEXT = f.read()
@@ -18,6 +18,18 @@ def test_get_indent():
 
 def test_locate_macros():
     assert len(locate_macros(EXAMPLE_TEXT)) == EXAMPLE_NUM_MACROS
+
+def test_get_macros():
+    macros = get_macros(EXAMPLE_TEXT)
+
+    assert macros[0][0] == "anchor"      # name
+    assert macros[0][1][0] == "why-yinl" # tag (arg)
+
+    assert macros[1][0] == "figure"                          # name
+    assert macros[1][1][0] == "/path/to/img.png"             # path (arg)
+    assert macros[1][1][1] == "Figure 1 - An example figure" # caption (arg)
+
+    assert len(macros) == EXAMPLE_NUM_MACROS
 
 def test_locate_sections():
     assert len(locate_sections(EXAMPLE_TEXT)) == EXAMPLE_NUM_SECTIONS

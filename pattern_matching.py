@@ -38,7 +38,7 @@ def get_sections(text: str) -> list[tuple[str, int, str]]:
     """
     section_locations = locate_sections(text)
     indents = [get_indent(text[:section.end()].splitlines()[-1]) for section in section_locations]
-    
+
     indent_size = reduce(gcd, indents)
     if indent_size == 0:
         indent_size = 4 # default to 4 spaces if no indent is found
@@ -66,3 +66,16 @@ def get_sections(text: str) -> list[tuple[str, int, str]]:
 
     return sections
     
+def get_macros(text: str) -> list[tuple[str, tuple[str]]]:
+    """
+        Gets macros and their arguments from a piece of text.
+        Returns a list of tuples of the form (macro_name, macro_args)
+    """
+    macro_locations = locate_macros(text)
+    macros = []
+    for macro in macro_locations:
+        macro_name = macro.group().split(":")[0].strip()
+        macro_args = macro.group().split(":")[1].strip()[1:-1].split(",")
+        macro_args = tuple([arg.strip() for arg in macro_args])
+        macros.append((macro_name, macro_args))
+    return macros
