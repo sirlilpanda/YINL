@@ -9,6 +9,7 @@ from functools import reduce
 
 MACRO_PATTERN = r"[a-zA-Z\-_]{1,50}: {0,1}\([a-zA-Z0-9\,. -/]*\)"
 SECTION_START_PATTERN = r" *section .*: {0,1}(?! {0,1}\(.*)"
+SHORTHAND_PATTERN = r" .*\\[a-zA-Z\-_] "
 
 def get_indent(line: str) -> int:
     """
@@ -29,6 +30,13 @@ def locate_sections(text: str) -> list[re.Match]:
         returns a list of regex match objects
     """
     return list(re.finditer(SECTION_START_PATTERN, text))
+
+def locate_shorthands(text: str) -> list[re.Match]:
+    """
+        Finds likely shorthand positions within a piece of text,
+        returns a list of regex match objects
+    """
+    return list(re.finditer(SHORTHAND_PATTERN, text))
 
 def get_sections(text: str) -> list[tuple[str, int, str]]:
     """

@@ -2,12 +2,13 @@
     Pytest tests for testing pattern matching module.
 """
 
-from ..pattern_matching import get_indent, locate_macros, get_macros, locate_sections, get_sections
+from ..pattern_matching import get_indent, locate_macros, get_macros, locate_sections, get_sections, locate_shorthands
 
 with open("tests/test.yi", "r") as f:
     EXAMPLE_TEXT = f.read()
     EXAMPLE_NUM_MACROS = 6
     EXAMPLE_NUM_SECTIONS = 2
+    EXAMPLE_NUM_SHORTANDS = 1
 
 def test_get_indent():
     assert get_indent("    a") == 4
@@ -44,3 +45,6 @@ def test_get_sections():
     assert sections[1][1] == 1           # indent level
 
     assert len(sections) == EXAMPLE_NUM_SECTIONS
+
+def test_locate_shorthands():
+    assert len(locate_shorthands(EXAMPLE_TEXT)) == EXAMPLE_NUM_SHORTANDS
