@@ -7,7 +7,7 @@ import re
 from typing import Callable
 from dataclasses import dataclass 
 
-from pattern_matching import locate_macros, locate_shorthands, locate_sections
+from pattern_matching import locate_header, locate_footer, locate_macros, locate_sections, locate_shorthands
 
 @dataclass
 class Header:
@@ -147,9 +147,12 @@ class Document:
         """
             Parses text into a document tree
         """
-        self.parse_header(text)
-        self.parse_body(text)
-        self.parse_footer(text)
+        header = locate_header(text)
+        footer = locate_footer(text)
+
+        self.parse_header(text[header.start():header.end()])
+        self.parse_footer(text[footer.start():footer.end()])
+        self.parse_body(text[header.end():footer.start()])
 
     def parse_file(self, file: str):
         """
