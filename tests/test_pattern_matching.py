@@ -2,7 +2,7 @@
     Pytest tests for testing pattern matching module.
 """
 
-from ..pattern_matching import get_indent, locate_macros, get_macros, locate_sections, get_sections, locate_shorthands
+from ..pattern_matching import *
 
 with open("tests/test.yi", "r") as f:
     EXAMPLE_TEXT = f.read()
@@ -16,6 +16,18 @@ def test_get_indent():
     assert get_indent(" a") == 1
     assert get_indent("") == 0
     assert get_indent("a    ") == 0
+
+def test_locate_header():
+    header = locate_header(EXAMPLE_TEXT)
+
+    assert header.start() == 0
+    assert header.end() == 179
+
+def test_locate_footer():
+    footer = locate_footer(EXAMPLE_TEXT)
+
+    assert footer.start() == 613
+    assert footer.end() == 827
 
 def test_locate_macros():
     assert len(locate_macros(EXAMPLE_TEXT)) == EXAMPLE_NUM_MACROS

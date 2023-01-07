@@ -10,12 +10,26 @@ from functools import reduce
 MACRO_PATTERN = r"[a-zA-Z\-_]{1,50}: {0,1}\([a-zA-Z0-9\,. -/]*\)"
 SECTION_START_PATTERN = r" *section .*: {0,1}(?! {0,1}\(.*)"
 SHORTHAND_PATTERN = r" .*\\[a-zA-Z\-_] "
+HEADER_PATTERN = r"header:.*?(?=\nsection)"
+FOOTER_PATTERN = r"footer:.*?$"
 
 def get_indent(line: str) -> int:
     """
         Determines the size of the indent of a line.
     """
     return len(line) - len(line.lstrip())
+
+def locate_header(text: str) -> re.Match:
+    """
+        Locates the header within the document.
+    """
+    return re.search(HEADER_PATTERN, text, re.DOTALL)
+
+def locate_footer(text: str) -> re.Match:
+    """
+        Locates the footer within the document.
+    """
+    return re.search(FOOTER_PATTERN, text, re.DOTALL)
 
 def locate_macros(text: str) -> list[re.Match]:
     """
@@ -37,6 +51,18 @@ def locate_shorthands(text: str) -> list[re.Match]:
         returns a list of regex match objects
     """
     return list(re.finditer(SHORTHAND_PATTERN, text))
+
+def get_header(text: str) -> str:
+    """
+        Gets the header from a piece of text.
+    """
+    return locate_header(text).group()
+
+def get_footer(text: str) -> str:
+    """
+        Gets the footer from a piece of text.
+    """
+    return locate_footer(text).group()
 
 def get_sections(text: str) -> list[tuple[str, int, str]]:
     """
