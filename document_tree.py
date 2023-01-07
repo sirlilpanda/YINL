@@ -106,19 +106,11 @@ class Document:
                 # so skip
                 i += 1
                 continue
-
-            match key:
-                case "title":
-                    self.header.title = value
-                case "author":
-                    self.header.authors = [author.strip() for author in value.split(",")]
-                case "date":
-                    self.header.date = value
-                case "institute":
-                    self.header.institute = value
-                case "citations":
-                    self.header.citation_style = value
-
+            
+            if key == "author": #as there maybe more then one author setting
+                self.header.__setattr__(key, [author.strip() for author in value.split(",")])
+            else:
+                self.header.__setattr__(key, value)
             i += 1
 
     def parse_footer(self, text: str):
