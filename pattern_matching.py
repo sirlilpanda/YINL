@@ -64,13 +64,25 @@ def get_footer(text: str) -> str:
     """
     return locate_footer(text).group()
 
-def get_sections(text: str) -> list[tuple[str, int, str]]:
+def get_sections(text: str, matches: list[re.Match] = None) -> list[tuple[str, int, str]]:
     """
         Gets sections and their contents from a piece of text.
         Note that section content may include subsections, macros, and shorthands.
         Returns a list of tuples of the form (section_name, section_indent, section_content)
+
+        Parameters
+        ----------
+
+        text: str
+            The text to search
+        matches: list[re.Match]
+            A list of regex matches to use for section locations. If none supplied, will be found automatically.
     """
-    section_locations = locate_sections(text)
+    if matches is None:
+        section_locations = locate_sections(text)
+    else:
+        section_locations = matches
+        
     indents = [get_indent(text[:section.end()].splitlines()[-1]) for section in section_locations]
 
     indent_size = reduce(gcd, indents)
