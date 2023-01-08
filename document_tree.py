@@ -109,7 +109,7 @@ class Document:
             
             if key == "author": #as there maybe more then one author setting
                 self.header.__setattr__(key, [author.strip() for author in value.split(",")])
-            else:
+            elif self.header.__getattribute__(key) == None:
                 self.header.__setattr__(key, value)
             i += 1
 
