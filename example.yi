@@ -7,8 +7,9 @@ header:
         2023-04-01
     institute:
         University of New Zealand
-    citations:
+    citation_style:
         IEEE
+
 
 section Introduction:
 
