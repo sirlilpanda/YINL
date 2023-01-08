@@ -85,8 +85,9 @@ class Document:
         """
         lines = text.splitlines()
         header_start = lines.index("header:")
-        header_end = lines[header_start:].index("")
-        header_lines = [line.strip() for line in lines[header_start:header_end] if line != ""]
+        print(lines)
+        header_end = lines[header_start:].index("")                #plus one here so header is not included in header lines
+        header_lines = [line.strip() for line in lines[header_start+1:header_end] if line != ""]
 
         i = 0
         while i < len(header_lines):
