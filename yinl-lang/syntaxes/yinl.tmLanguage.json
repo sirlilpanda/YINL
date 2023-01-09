@@ -1,0 +1,45 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "YINL",
+	"patterns": [
+		{
+			"include": "#shorthands"
+		},
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#macros"
+		},
+		{
+			"include": "#settings"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [{
+				"name": "keyword.control.yinl",
+				"match": "((?<!\\\\)(header|footer)(?=:))|(?<!\\\\|\\w)section(?=(.*?):{1})(?! [a-zA-Z\\-_]+: {0,1}\\([a-zA-Z0-9\\,. -/]*\\))"
+			}]
+		},
+		"macros" : {
+			"patterns": [{
+				"name": "support.function.control.yinl",
+				"match": "[a-zA-Z\\-_]+(?=: {0,1}\\([a-zA-Z0-9\\,. -/]*\\))"
+			}]
+		},
+		"settings" : {
+			"patterns": [{
+				"name": "comment.control.yinl",
+				"match": "(?<!\\\\|section)(title|author|date|institute|citations|macros|shorthands|citation_style)(?=:)"
+			}]
+		},
+		"shorthands" : {
+			"patterns": [{
+				"name": "string.quoted.control.yinl",
+				"match": "(?<!\\\\)\\\\{1}(?!section|header|footer)[a-zA-Z_]"
+			}]
+		}
+	},
+	"scopeName": "source.yi"
+}

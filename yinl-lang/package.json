@@ -1,0 +1,25 @@
+{
+  "name": "yinl-lang",
+  "displayName": "YINL lang",
+  "description": "Syntax highlighting for .yi and .yinl files",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "yinl",
+      "aliases": ["YINL", "yinl"],
+      "extensions": [".yi",".yinl"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "yinl",
+      "scopeName": "source.yi",
+      "path": "./syntaxes/yinl.tmLanguage.json"
+    }]
+  }
+}
