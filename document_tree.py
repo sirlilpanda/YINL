@@ -83,12 +83,10 @@ class Document:
         """
             Parses the document header from an open file.
         """
-        tab_space_amount = 4 #the amount of spaces in a tab
+        tab_space_amount = 4
         lines = text.splitlines()
         header_start = lines.index("header:")
-        header_end = lines[header_start:].index("") #TODO needs to be fixed so a new line doesnt need to exist to end the header
-        
-        #plus one here so header is not included in header lines
+        header_end = lines[header_start:].index("")                #plus one here so header is not included in header lines
         header_lines = [line[tab_space_amount:] for line in lines[header_start+1:header_end] if line != ""]
         i = 0
         while i < len(header_lines):
@@ -96,7 +94,7 @@ class Document:
             if line.endswith(":") and not line.endswith("\\:"):
                 # key with value on next lines
                 key = line[:-1]
-                value_index = i+1 #the start of the values
+                value_index = i+1
                 tabbed = True
                 # will go through the header untill the next no indented index is found
                 while tabbed and value_index < len(header_lines):
@@ -104,13 +102,17 @@ class Document:
                         value_index += 1
                     else:
                         tabbed = False
-                # joins the results together with commas
+                # joins the results together
                 value = ",".join([val.strip() for val in header_lines[i+1:value_index]])
                 i = value_index-1
+            elif ":" in line and "\:" not in line:
+                # key with value on same line
+                key, value = line.split(":")
+                value = value.strip()
             
             if key in ("authors", "author"): #as there maybe more then one author setting
                 self.header.__setattr__(key, [author.strip() for author in value.split(",")])
-            elif self.header.__getattribute__(key) == None: # this checks for if the attribute exists
+            elif self.header.__getattribute__(key) == None:
                 self.header.__setattr__(key, value)
             i += 1
 
@@ -118,12 +120,10 @@ class Document:
         """
             Parses the document footer from an open file.
         """
-        #TODO parse macros correctly
-        tab_space_amount = 4 #make global
+        tab_space_amount = 4
         lines = text.splitlines()
         footer_start = lines.index("footer:")
-        footer_end = len(lines) #end of the file                
-        #plus one here so footer is not included in footer lines
+        footer_end = len(lines)                #plus one here so footer is not included in footer lines
         footer_lines = [line[tab_space_amount:] for line in lines[footer_start+1:footer_end] if line != ""]
         i = 0
         while i < len(footer_lines):
@@ -131,23 +131,27 @@ class Document:
             if line.endswith(":") and not line.endswith("\\:"):
                 # key with value on next lines
                 key = line[:-1]
-                value_index = i+1 # the start of the values
+                value_index = i+1
                 tabbed = True
-                # will go through the header untill the next no indented index is found
                 while tabbed and value_index < len(footer_lines):
                     print(footer_lines[value_index])
                     if footer_lines[value_index].startswith(" "*tab_space_amount):
                         value_index += 1
                     else:
                         tabbed = False
-                # cleans up the values
                 value = [val.strip() for val in footer_lines[i+1:value_index]]
                 i = value_index-1
+            elif ":" in line and "\:" not in line:
+                # key with value on same line
+                key, value = line.split(":")
+                value = value.strip()
 
-            # makes sure the attribute exist in the footer object
-            if self.footer.__getattribute__(key) == None:
+            if self.footer.__getattribute__(key) == None: #as there maybe more then one author setting
                 self.footer.__setattr__(key, value)
             i+=1
+
+
+        # TODO: implement
 
     def parse_body(self, text: str):
         """
