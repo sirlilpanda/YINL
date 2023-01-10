@@ -7,8 +7,6 @@ import re
 from typing import Callable, Union
 from pattern_matching import locate_header, locate_footer, SECTION_START_PATTERN
 
-from pprint import pprint
-
 class Section:
     """
         Describes a section of the body of the document.
@@ -167,7 +165,7 @@ class Document:
 
                 if line.strip() == "":
                     last_section.add_child("\n")
-                elif indent >= last_section.indent:
+                elif indent > last_section.indent:
                     last_section.add_child(line.lstrip())
                 else:
                     sections.pop()
