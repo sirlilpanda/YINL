@@ -130,10 +130,10 @@ class Document:
             # this assumes that there is only one value
             elif ":" in line and "\:" not in line and not line.startswith(" "*tab_space_amount):
                 key, val = line.split(":", 1)
-                return_dict.setdefault(key, [val])
+                return_dict.setdefault(key, [val.lstrip()])
             else:
                 # add the value to the current key
-                return_dict[current_key] += [line]
+                return_dict[current_key] += [line.lstrip()]
         return return_dict
 
 
@@ -157,7 +157,7 @@ class Document:
                     prev_section.add_child(curr_section)
                 else:
                     self.body.append(curr_section)
-                    
+
                 sections.append(curr_section)
 
             elif len(sections) > 0:
