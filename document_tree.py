@@ -7,8 +7,6 @@ import re
 from typing import Callable, Union
 from pattern_matching import locate_header, locate_footer, SECTION_START_PATTERN
 
-from pprint import pprint
-
 class Section:
     """
         Describes a section of the body of the document.
@@ -165,8 +163,6 @@ class Document:
                     last_section.add_child(line)
                 else:
                     sections.pop()
-
-        print(self.body)
 
         # TODO: implement macros and shorthands
 
