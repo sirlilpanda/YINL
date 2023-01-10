@@ -7,6 +7,8 @@ import re
 from typing import Callable, Union
 from pattern_matching import locate_header, locate_footer, SECTION_START_PATTERN
 
+from pprint import pprint
+
 class Section:
     """
         Describes a section of the body of the document.
@@ -93,7 +95,12 @@ class Document:
 
 
     def _parse_shorthands(self):
-        #TODO
+        """
+            Parses the the shorthands from the footer in their own dict to be used
+            in the parse_body method
+        """
+        for key, val in map(lambda s: s.split(":"), self.footer["shorthands"]):
+            self.shorthands.setdefault(key.strip(), val.strip())
         self.footer.pop("shorthands")
 
     @classmethod
