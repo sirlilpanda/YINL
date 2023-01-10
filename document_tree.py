@@ -81,7 +81,17 @@ class Document:
         """
             Parses the macros from the footer with some futher processing
         """
-
+        tab_space_amount = 4
+        macros = self.footer["macros"]
+        current_key = ""
+                    # removes the first nest of tabs
+        for line in map(lambda s: s[4:], macros):
+            if not line.startswith(" "*tab_space_amount):
+                current_key = line.split(":")[0]
+                self.macros.setdefault(current_key, "")
+            else:
+                #remove the second tab
+                self.macros[current_key] += line[4:]+"\n"
         self.footer.pop("macros")
 
 
