@@ -9,7 +9,7 @@ def load_file(filename) -> str:
 def main():
     file = load_file("example.yi")    
     doc = Document()
-    doc.parse_file(file)
+    doc.parse_text(file)
     print(doc.header)
     print(doc)
 

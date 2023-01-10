@@ -4,10 +4,8 @@
 
 import re
 
-from typing import Callable, Optional
-from dataclasses import dataclass 
-
-from pattern_matching import locate_header, locate_footer, locate_macros, locate_sections, locate_shorthands
+from typing import Callable, Union
+from pattern_matching import locate_header, locate_footer, SECTION_START_PATTERN
 
 from pprint import pprint
 
@@ -20,26 +18,27 @@ class Section:
 
         name: str
             The name (title) of the section.
-        content: str
-            The content of the section.
+        indent: int
+            The indent level of the section
         parent: Section
             The parent section of this section. May be None if no parent.
         pos: int
             The position of this section within its parent section. Defaults to 0.
     """
-    def __init__(self, name: str, content: str, parent: 'Section' = None, pos: int = 0) -> None:
+    def __init__(self, name: str, indent: int = 0, parent: 'Section' = None, pos: int = 0) -> None:
         self.name: str = name
-        self.content: str = content
+        self.indent: int = indent
         self.parent: 'Section' = parent
         self.pos: int = pos
-        self.children: list['Section'] = list()
+        self.children: list[Union['Section', str]] = list()
     
     def __repr__(self) -> str:
         
-        return f"Section({self.name}, {self.content})"
+        return f"Section({self.name}, {self.children})"
 
-    def add_child(self, section: 'Section'):
-        section.parent = self
+    def add_child(self, section: Union['Section', str]):
+        if isinstance(section, Section):
+            section.parent = self
         self.children.append(section)
 
 class Document:
@@ -137,16 +136,40 @@ class Document:
         """
             Parses the body of the open file.
         """
-        sections = locate_sections(text)
-        macros = locate_macros(text)
-        shorthands = locate_shorthands(text)
 
-        for section in sections:
-            # TODO: parse out subsections and mark them as a child of the parent section
-            self.sections.append(Section(section[0], section[1]))
+        lines = text.splitlines()
+        sections = []
 
-        # TODO: deal with macros and shorthands
-        # may need to parse the footer first in order to implement this
+        for line in lines:
+
+            if re.match(SECTION_START_PATTERN, line.strip()) is not None:
+                # identify section start
+                curr_section = Section(line.strip()[8:-1], len(line) - len(line.lstrip()))
+
+                # if we have already found a section
+                if len(sections) > 0:
+                    prev_section = sections[-1]
+                    prev_section.add_child(curr_section)
+
+                sections.append(curr_section)
+                self.body.append(curr_section)
+
+            elif len(sections) > 0:
+                # if section identified
+                last_section = sections[-1]
+                indent = len(line) - len(line.lstrip())
+
+                if line.strip() == "":
+                    last_section.add_child("\n")
+                elif indent >= last_section.indent:
+                    last_section.add_child(line)
+                else:
+                    sections.pop()
+
+        print(self.body)
+
+        # TODO: implement macros and shorthands
+
 
     def parse_text(self, text: str):
         """
@@ -157,7 +180,7 @@ class Document:
 
         self.parse_header(text[header.start():header.end()])
         self.parse_footer(text[footer.start():footer.end()])
-        # self.parse_body(text[header.end():footer.start()])
+        self.parse_body(text[header.end():footer.start()])
 
     def parse_file(self, file: str):
         """
