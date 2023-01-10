@@ -4,23 +4,12 @@
 
 import re
 
-from typing import Callable
+from typing import Callable, Optional
 from dataclasses import dataclass 
 
 from pattern_matching import locate_header, locate_footer, locate_macros, locate_sections, locate_shorthands
 
-@dataclass
-class Header:
-    """
-        Stores document header information as per YINL spec.
-        This is meant to be a direct reflection of the document header in the YINL file.
-    """
-    document: 'Document'
-    title: str = None
-    authors: list[str] = None
-    date: str = None
-    institute: str = None
-    citation_style: str = None      
+from pprint import pprint
 
 class Section:
     """
@@ -53,17 +42,6 @@ class Section:
         section.parent = self
         self.children.append(section)
 
-@dataclass
-class Footer:
-    """
-        Stores document footer information as per YINL spec.
-        This is meant to be a direct reflection of the document footer in the YINL file.
-    """
-    document: 'Document'
-    citations: dict[str, str] = None
-    macros: dict[str, Callable] = None
-    shorthands: dict[str, str] = None
-
 class Document:
     """
         Describes a YINL document.
@@ -71,9 +49,12 @@ class Document:
     """
 
     def __init__(self) -> None:
-        self.header = Header(self)
+        self.header : dict[str, list[str]] = dict() 
         self.body: list[Section] = []
-        self.footer = Footer(self)
+        # citations and appendix should really only exist in here
+        self.footer : dict[str, list[str]] = dict() 
+        self.macros : dict[str, Callable] = dict()
+        self.shorthands : dict[str, str] = dict()
 
     def __repr__(self) -> str:
 
@@ -83,75 +64,64 @@ class Document:
         """
             Parses the document header from an open file.
         """
-        tab_space_amount = 4
-        lines = text.splitlines()
-        header_start = lines.index("header:")
-        header_end = lines[header_start:].index("")                #plus one here so header is not included in header lines
-        header_lines = [line[tab_space_amount:] for line in lines[header_start+1:header_end] if line != ""]
-        i = 0
-        while i < len(header_lines):
-            line = header_lines[i]
-            if line.endswith(":") and not line.endswith("\\:"):
-                # key with value on next lines
-                key = line[:-1]
-                value_index = i+1
-                tabbed = True
-                # will go through the header untill the next no indented index is found
-                while tabbed and value_index < len(header_lines):
-                    if header_lines[value_index].startswith(" "*tab_space_amount):
-                        value_index += 1
-                    else:
-                        tabbed = False
-                # joins the results together
-                value = ",".join([val.strip() for val in header_lines[i+1:value_index]])
-                i = value_index-1
-            elif ":" in line and "\:" not in line:
-                # key with value on same line
-                key, value = line.split(":")
-                value = value.strip()
-            
-            if key in ("authors", "author"): #as there maybe more then one author setting
-                self.header.__setattr__(key, [author.strip() for author in value.split(",")])
-            elif self.header.__getattribute__(key) == None:
-                self.header.__setattr__(key, value)
-            i += 1
-
+        self.header = Document._parse_text_to_dict("header:", text)
     def parse_footer(self, text: str):
         """
             Parses the document footer from an open file.
         """
-        tab_space_amount = 4
+        self.footer = Document._parse_text_to_dict("footer:", text)
+        # removes the macros from the footer dict and does further processing
+        self._parse_macros()
+        self._parse_shorthands()
+        #cleans up the strings of the citations and other settings
+        for k in self.footer.keys():
+             self.footer[k] = list(map(str.strip, self.footer[k]))
+    
+    def _parse_macros(self):
+        """
+            Parses the macros from the footer with some futher processing
+        """
+
+        self.footer.pop("macros")
+
+
+    def _parse_shorthands(self):
+        #TODO
+        self.footer.pop("shorthands")
+
+    @classmethod
+    def _parse_text_to_dict(cls, start_str: str, text: str) -> dict[str, str]:
+        """
+            parses the tabbed scoped text in to a dict
+        """
+        tab_space_amount = 4 #TODO allow for differnt tab amounts
         lines = text.splitlines()
-        footer_start = lines.index("footer:")
-        footer_end = len(lines)                #plus one here so footer is not included in footer lines
-        footer_lines = [line[tab_space_amount:] for line in lines[footer_start+1:footer_end] if line != ""]
-        i = 0
-        while i < len(footer_lines):
-            line = footer_lines[i]
-            if line.endswith(":") and not line.endswith("\\:"):
-                # key with value on next lines
-                key = line[:-1]
-                value_index = i+1
-                tabbed = True
-                while tabbed and value_index < len(footer_lines):
-                    print(footer_lines[value_index])
-                    if footer_lines[value_index].startswith(" "*tab_space_amount):
-                        value_index += 1
-                    else:
-                        tabbed = False
-                value = [val.strip() for val in footer_lines[i+1:value_index]]
-                i = value_index-1
-            elif ":" in line and "\:" not in line:
-                # key with value on same line
-                key, value = line.split(":")
-                value = value.strip()
+        #incase someone writes "comments" at the top of the file
+        start_index = lines.index(f"{start_str}") if start_str else 0
+        lines = list(filter( 
+            None, #removes any empty strings
+            map(
+                lambda str: str[tab_space_amount:], #removes the first tab from all strings
+                lines[start_index+1:] #plus one here so start string is not included in the lines
+            )
+        ))
+        return_dict = {}
+        current_key = "" #current key that is values are related too
+        for line in lines:
+            # adds the setting as a key in the dict and strips the colon
+            if line.endswith(":") or line.endswith(")") and not line.endswith("\\:") and not line.startswith(" "*tab_space_amount):
+                current_key = line.strip(":")
+                return_dict.setdefault(current_key, [])
+            # checks to see if the value is on the same line
+            # this assumes that there is only one value
+            elif ":" in line and "\:" not in line and not line.startswith(" "*tab_space_amount):
+                key, val = line.split(":", 1)
+                return_dict.setdefault(key, [val])
+            else:
+                # add the value to the current key
+                return_dict[current_key] += [line]
+        return return_dict
 
-            if self.footer.__getattribute__(key) == None: #as there maybe more then one author setting
-                self.footer.__setattr__(key, value)
-            i+=1
-
-
-        # TODO: implement
 
     def parse_body(self, text: str):
         """
