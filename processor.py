@@ -11,7 +11,7 @@ def main():
     doc = Document()
     doc.parse_text(file)
     print(doc.header)
-    print(doc)
+    print(doc.body)
 
 if __name__ == "__main__":
     main()

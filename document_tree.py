@@ -148,9 +148,10 @@ class Document:
                 if len(sections) > 0:
                     prev_section = sections[-1]
                     prev_section.add_child(curr_section)
-
+                else:
+                    self.body.append(curr_section)
+                    
                 sections.append(curr_section)
-                self.body.append(curr_section)
 
             elif len(sections) > 0:
                 # if section identified
@@ -160,7 +161,7 @@ class Document:
                 if line.strip() == "":
                     last_section.add_child("\n")
                 elif indent >= last_section.indent:
-                    last_section.add_child(line)
+                    last_section.add_child(line.lstrip())
                 else:
                     sections.pop()
 
