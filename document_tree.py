@@ -128,19 +128,17 @@ class Document:
             Parses the macros from the footer with some futher processing
         """
         tab_space_amount = 4
-        macros = self.footer["macros:"]
-        self.footer.pop("macros:")
         current_key = ""
         macros_dict = {}
 
-        for line in (macros.splitlines()):
+        for line in (self.footer["macros:"].splitlines()):
             if not line.startswith(" "*tab_space_amount):
                 current_key = line
                 macros_dict.setdefault(current_key, "")
             else:
-                #remove the second tab
                 macros_dict[current_key] += line+"\n"
 
+        #converts the macro_dict in to a dict of str and callables
         for func_name_n_args, func_body in macros_dict.items():
             f_name = func_name_n_args.split(":")[0]
             f_args = func_name_n_args.split(":")[1].strip()[1:-1].split(",")
@@ -149,10 +147,20 @@ class Document:
                 Document._convert_macro_string_to_func(func_body, f_name, f_args)        
             )
     
+        self.footer.pop("macros:")
+        
     @staticmethod
     def _convert_macro_string_to_func(func_body: str, func_name: str, func_args : list[str]) -> Callable:
+        """
+            creates a function from the given args i.e
+
+            _convert_macro_string_to_func("return 'hi '+name", say_hi, ["name"])
+            the func var will become:
+            def say_hi(name):
+                return 'hi '+name
+            then this is complied to a function object
+        """
         func = f"""def {func_name}({",".join(func_args)}):\n{func_body}"""
-        pprint(func)
         code_obj = compile(func, '<string>', 'exec')
         return FunctionType(code_obj.co_consts[0], globals())
 
