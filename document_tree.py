@@ -40,6 +40,8 @@ class Section:
             section.parent = self
         self.children.append(section)
 
+from pprint import pprint
+
 class Document:
     """
         Describes a YINL document.
