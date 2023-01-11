@@ -5,6 +5,7 @@
 import re
 
 from typing import Callable, Union
+from types import FunctionType
 from pattern_matching import locate_header, locate_footer, SECTION_START_PATTERN
 
 from pprint import pprint
@@ -63,13 +64,58 @@ class Document:
         """
             Parses the document header from an open file.
         """
-        self.header = Document._parse_text_to_dict("header:", text)
+        tab_space_amount = 4 #TODO allow for differnt tab amounts
+        lines = text.splitlines()
+        #incase someone writes "comments" at the top of the file
+        start_index = lines.index("header:")
+        lines = list(filter( 
+            None, #removes any empty strings
+            map(
+                lambda str: str[tab_space_amount:], #removes the first tab from all strings
+                lines[start_index+1:] #plus one here so start string is not included in the lines
+            )
+        ))
+        current_key = "" #current key that is values are related too
+        for line in lines:
+            # adds the setting as a key in the dict and strips the colon
+            if line.endswith(":") or line.endswith(")") and not line.endswith("\\:") and not line.startswith(" "*tab_space_amount):
+                current_key = line.strip(":")
+                self.header.setdefault(current_key, [])
+            # checks to see if the value is on the same line
+            # this assumes that there is only one value
+            elif ":" in line and "\:" not in line and not line.startswith(" "*tab_space_amount):
+                key, val = line.split(":", 1)
+                self.header.setdefault(key, [val.lstrip()])
+            else:
+                # add the value to the current key
+                self.header[current_key] += [line.lstrip()]
 
     def parse_footer(self, text: str):
         """
             Parses the document footer from an open file.
         """
-        self.footer = Document._parse_text_to_dict("footer:", text)
+        tab_space_amount = 4 #TODO allow for differnt tab amounts
+        lines = text.splitlines()
+        #incase someone writes "comments" at the top of the file
+        start_index = lines.index("footer:")
+        lines = list(filter( 
+            None, #removes any empty strings
+            map(
+                lambda str: str[tab_space_amount:], #removes the first tab from all strings
+                lines[start_index+1:] #plus one here so start string is not included in the lines
+            )
+        ))
+        # print(*lines, sep="\n")
+        current_key = ""
+        for line in lines:
+
+            if not line.startswith(" "*tab_space_amount):
+                current_key = line
+                self.footer.setdefault(current_key, "")
+            else:
+                #remove the second tab
+                self.footer[current_key] += line[4:]+"\n"
+
         # removes the macros from the footer dict and does further processing
         self._parse_macros()
         self._parse_shorthands()
@@ -81,61 +127,23 @@ class Document:
         """
             Parses the macros from the footer with some futher processing
         """
-        tab_space_amount = 4
-        macros = self.footer["macros"]
-        current_key = ""
-                    # removes the first nest of tabs
-        for line in map(lambda s: s[4:], macros):
-            if not line.startswith(" "*tab_space_amount):
-                current_key = line.split(":")[0]
-                self.macros.setdefault(current_key, "")
-            else:
-                #remove the second tab
-                self.macros[current_key] += line[4:]+"\n"
-        self.footer.pop("macros")
-
+        ...
 
     def _parse_shorthands(self):
         """
             Parses the the shorthands from the footer in their own dict to be used
             in the parse_body method
         """
-        for key, val in map(lambda s: s.split(":"), self.footer["shorthands"]):
+        for key, val in map(lambda s: s.split(":"), self.footer["shorthands:"].splitlines()):
             self.shorthands.setdefault(key.strip(), val.strip())
-        self.footer.pop("shorthands")
+        self.footer.pop("shorthands:")
 
     @classmethod
     def _parse_text_to_dict(cls, start_str: str, text: str) -> dict[str, str]:
         """
             parses the tabbed scoped text in to a dict
         """
-        tab_space_amount = 4 #TODO allow for differnt tab amounts
-        lines = text.splitlines()
-        #incase someone writes "comments" at the top of the file
-        start_index = lines.index(f"{start_str}") if start_str else 0
-        lines = list(filter( 
-            None, #removes any empty strings
-            map(
-                lambda str: str[tab_space_amount:], #removes the first tab from all strings
-                lines[start_index+1:] #plus one here so start string is not included in the lines
-            )
-        ))
-        return_dict = {}
-        current_key = "" #current key that is values are related too
-        for line in lines:
-            # adds the setting as a key in the dict and strips the colon
-            if line.endswith(":") or line.endswith(")") and not line.endswith("\\:") and not line.startswith(" "*tab_space_amount):
-                current_key = line.strip(":")
-                return_dict.setdefault(current_key, [])
-            # checks to see if the value is on the same line
-            # this assumes that there is only one value
-            elif ":" in line and "\:" not in line and not line.startswith(" "*tab_space_amount):
-                key, val = line.split(":", 1)
-                return_dict.setdefault(key, [val.lstrip()])
-            else:
-                # add the value to the current key
-                return_dict[current_key] += [line.lstrip()]
-        return return_dict
+
 
 
     def parse_body(self, text: str):
