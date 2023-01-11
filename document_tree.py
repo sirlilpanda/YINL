@@ -7,6 +7,8 @@ import re
 from typing import Callable, Union
 from pattern_matching import locate_header, locate_footer, SECTION_START_PATTERN
 
+from pprint import pprint
+
 class Section:
     """
         Describes a section of the body of the document.
@@ -62,6 +64,7 @@ class Document:
             Parses the document header from an open file.
         """
         self.header = Document._parse_text_to_dict("header:", text)
+
     def parse_footer(self, text: str):
         """
             Parses the document footer from an open file.
@@ -144,7 +147,6 @@ class Document:
         sections = []
 
         for line in lines:
-
             if re.match(SECTION_START_PATTERN, line.strip()) is not None:
                 # identify section start
                 curr_section = Section(line.strip()[8:-1], len(line) - len(line.lstrip()))
@@ -192,3 +194,29 @@ class Document:
         with open(file, "r") as f:
             text = f.read()
         self.parse_text(text)
+    
+    def md(self) -> str:
+        auth_sep = ",\n"
+        out_str = f'''
+# {self.header['title'][0]}
+{"author" if len(self.header["authors"]) == 1 else "authors"}:{auth_sep.join(self.header["authors"])}
+{self.header["date"][0]}
+---\n
+'''
+        def body_to_str(section: Section, header_depth=2) -> str:
+            body_str = ""
+            body_str += "#"*header_depth+" "+section.name+"\n"
+            for s in section.children:
+                if type(s) == str:
+                    if s:
+                        body_str += s
+                else:
+                    body_str += body_to_str(s, header_depth+1)
+                    body_str += "\n"+"#"*(header_depth+1)+"\n"
+            return body_str
+
+        for section in self.body:
+            out_str += body_to_str(section)
+        with open(f"{self.header['title'][0]}.md", "w+") as md:
+            md.write(out_str)
+        return out_str
