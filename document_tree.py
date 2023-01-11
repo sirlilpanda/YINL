@@ -8,8 +8,6 @@ from typing import Callable, Union
 from types import FunctionType
 from pattern_matching import locate_header, locate_footer, SECTION_START_PATTERN
 
-from pprint import pprint
-
 class Section:
     """
         Describes a section of the body of the document.
@@ -152,7 +150,6 @@ class Document:
     @staticmethod
     def _convert_macro_string_to_func(func_body: str, func_name: str, func_args : list[str]) -> Callable:
         func = f"""def {func_name}({",".join(func_args)}):\n{func_body}"""
-        pprint(func)
         code_obj = compile(func, '<string>', 'exec')
         return FunctionType(code_obj.co_consts[0], globals())
 
@@ -165,14 +162,6 @@ class Document:
         for key, val in map(lambda s: s.split(":"), self.footer["shorthands:"].splitlines()):
             self.shorthands.setdefault(key.strip(), val.strip())
         self.footer.pop("shorthands:")
-
-    @classmethod
-    def _parse_text_to_dict(cls, start_str: str, text: str) -> dict[str, str]:
-        """
-            parses the tabbed scoped text in to a dict
-        """
-
-
 
     def parse_body(self, text: str):
         """
