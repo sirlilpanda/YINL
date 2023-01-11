@@ -169,6 +169,7 @@ class Document:
                     last_section.add_child(line.lstrip())
                 else:
                     sections.pop()
+                    sections[-1].add_child(line.lstrip())
 
         # TODO: implement macros and shorthands
 
