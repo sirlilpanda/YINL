@@ -174,7 +174,11 @@ class Document:
         for line in lines:
             if re.match(SECTION_START_PATTERN, line.strip()) is not None:
                 # identify section start
-                curr_section = Section(line.strip()[8:-1], len(line) - len(line.lstrip()))
+                parts = line.strip().split(":")
+                curr_section = Section(parts[0][8:], len(line) - len(line.lstrip()))
+
+                if parts[1].strip() != "":
+                    curr_section.add_child(":".join(parts[1:]).strip())
 
                 # if we have already found a section
                 if len(sections) > 0:
