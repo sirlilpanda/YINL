@@ -29,7 +29,7 @@ class Section:
         self.indent: int = indent
         self.parent: 'Section' = parent
         self.pos: int = pos
-        self.children: list[Union['Section', str]] = list()
+        self.children: list['Section'| str] = list()
     
     def __repr__(self) -> str:
         
@@ -234,8 +234,10 @@ class Document:
         self.parse_text(text)
     
     def md(self) -> str:
+        """very basic markdown converter"""
         auth_sep = ",\n"
-        out_str = f'''
+        out_str = \
+f'''
 # {self.header['title'][0]}
 {"author" if len(self.header["authors"]) == 1 else "authors"}:{auth_sep.join(self.header["authors"])}
 {self.header["date"][0]}

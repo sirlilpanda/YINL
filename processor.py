@@ -12,7 +12,6 @@ def main():
     doc.parse_text(file)
     print(doc.header)
     print(doc.body)
-    print(doc.macros["example_macro"]("hello"))
 
 if __name__ == "__main__":
     main()
