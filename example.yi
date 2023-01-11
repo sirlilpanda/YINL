@@ -27,6 +27,6 @@ footer:
         dnorman13: D. A. Norman, The Design of Everyday Things. (Revis and expand ed.) 2013.
     macros:
         example_macro: (argument)
-            <python>
+            return argument
     shorthands:
         y: YINL
