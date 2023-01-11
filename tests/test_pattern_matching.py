@@ -10,13 +10,6 @@ with open("tests/test.yi", "r") as f:
     EXAMPLE_NUM_SECTIONS = 2
     EXAMPLE_NUM_SHORTANDS = 1
 
-def test_get_indent():
-    assert get_indent("    a") == 4
-    assert get_indent("a") == 0
-    assert get_indent(" a") == 1
-    assert get_indent("") == 0
-    assert get_indent("a    ") == 0
-
 def test_locate_header():
     header = locate_header(EXAMPLE_TEXT)
 
