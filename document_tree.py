@@ -127,7 +127,35 @@ class Document:
         """
             Parses the macros from the footer with some futher processing
         """
-        ...
+        tab_space_amount = 4
+        macros = self.footer["macros:"]
+        self.footer.pop("macros:")
+        current_key = ""
+        macros_dict = {}
+
+        for line in (macros.splitlines()):
+            if not line.startswith(" "*tab_space_amount):
+                current_key = line
+                macros_dict.setdefault(current_key, "")
+            else:
+                #remove the second tab
+                macros_dict[current_key] += line+"\n"
+
+        for func_name_n_args, func_body in macros_dict.items():
+            f_name = func_name_n_args.split(":")[0]
+            f_args = func_name_n_args.split(":")[1].strip()[1:-1].split(",")
+            self.macros.setdefault(
+                f_name,
+                Document._convert_macro_string_to_func(func_body, f_name, f_args)        
+            )
+    
+    @staticmethod
+    def _convert_macro_string_to_func(func_body: str, func_name: str, func_args : list[str]) -> Callable:
+        func = f"""def {func_name}({",".join(func_args)}):\n{func_body}"""
+        pprint(func)
+        code_obj = compile(func, '<string>', 'exec')
+        return FunctionType(code_obj.co_consts[0], globals())
+
 
     def _parse_shorthands(self):
         """
