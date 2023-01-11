@@ -8,8 +8,6 @@ from typing import Callable, Union
 from types import FunctionType
 from pattern_matching import locate_header, locate_footer, SECTION_START_PATTERN
 
-from pprint import pprint
-
 class Section:
     """
         Describes a section of the body of the document.
@@ -174,14 +172,6 @@ class Document:
             self.shorthands.setdefault(key.strip(), val.strip())
         self.footer.pop("shorthands:")
 
-    @classmethod
-    def _parse_text_to_dict(cls, start_str: str, text: str) -> dict[str, str]:
-        """
-            parses the tabbed scoped text in to a dict
-        """
-
-
-
     def parse_body(self, text: str):
         """
             Parses the body of the open file.
@@ -193,7 +183,11 @@ class Document:
         for line in lines:
             if re.match(SECTION_START_PATTERN, line.strip()) is not None:
                 # identify section start
-                curr_section = Section(line.strip()[8:-1], len(line) - len(line.lstrip()))
+                parts = line.strip().split(":")
+                curr_section = Section(parts[0][8:], len(line) - len(line.lstrip()))
+
+                if parts[1].strip() != "":
+                    curr_section.add_child(":".join(parts[1:]).strip())
 
                 # if we have already found a section
                 if len(sections) > 0:
